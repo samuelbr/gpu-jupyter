@@ -25,6 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+
     - name: Generate Dockerfile
       run: ./generate-Dockerfile.sh --python-only
 
