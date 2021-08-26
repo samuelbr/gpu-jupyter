@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Docker Build (default)
+name: Docker Build (python)
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -10,10 +10,17 @@ on:
   pull_request:
     branches: [ master, docker-swarm ]
 
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   docker-default:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - uses: actions/checkout@v2
@@ -21,8 +28,15 @@ jobs:
     - name: Generate Dockerfile
       run: ./generate-Dockerfile.sh --python-only
 
-    - name: Build Image
-      run: docker build -t gpu-jupyter .build/  # will take a while
+    - name: Log into registry ${{ env.REGISTRY }}
+      uses: docker/login-action@v1 
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Quickstart Entrypoint Script
-      run: docker run -d -it -p 8848:8888 -v $(pwd)/data:/home/jovyan/work -e GRANT_SUDO=yes -e JUPYTER_ENABLE_LAB=yes -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" --user root --restart always --name gpu-jupyter_1 gpu-jupyter
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        context: .build
