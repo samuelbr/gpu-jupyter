@@ -11,27 +11,15 @@ RUN set -ex \
 ' \
  && apt-get update \
  && apt-get -y install htop apt-utils iputils-ping graphviz libgraphviz-dev openssh-client \
- && pip install --no-cache-dir $buildDeps
-
-# Install various extensions
-RUN fix-permissions $CONDA_DIR
-
-# RUN jupyter labextension install @jupyterlab/github
-# RUN pip install jupyterlab-git
-RUN pip install jupyterlab-drawio
-RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
-RUN jupyter labextension install jupyterlab-plotly
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager plotlywidget
-# RUN pip install --no-cache-dir jupyter-tabnine  --user && \
-#   jupyter nbextension install --py jupyter_tabnine --user && \
-#   jupyter nbextension enable --py jupyter_tabnine --user && \
-#   jupyter serverextension enable --py jupyter_tabnine --user
-RUN pip install --no-cache-dir jupyter_contrib_nbextensions \
-  jupyter_nbextensions_configurator rise
-#  jupyter nbextension enable codefolding/main
-RUN jupyter labextension install @ijmbarr/jupyterlab_spellchecker
-
-RUN fix-permissions /home/$NB_USER
+ && pip install --no-cache-dir $buildDeps \
+ && fix-permissions $CONDA_DIR \
+ && pip install jupyterlab-drawio \
+ && jupyter nbextension enable --py --sys-prefix ipyleaflet \
+ && jupyter labextension install jupyterlab-plotly \
+ && jupyter labextension install @jupyter-widgets/jupyterlab-manager plotlywidget \
+ && pip install --no-cache-dir jupyter_contrib_nbextensions jupyter_nbextensions_configurator rise \
+ && jupyter labextension install @ijmbarr/jupyterlab_spellchecker \
+ && fix-permissions /home/$NB_USER
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID
